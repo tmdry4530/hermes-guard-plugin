@@ -1,0 +1,87 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0 -- /workspace/hermes-agent-src/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/company/dev/hermes-guard-plugin
+configfile: pytest.ini
+plugins: anyio-4.16.0
+collecting ... collected 69 items
+
+tests/test_commands.py::test_status_human_friendly PASSED                [  1%]
+tests/test_commands.py::test_queue_table PASSED                          [  2%]
+tests/test_commands.py::test_ledger_table_and_json PASSED                [  4%]
+tests/test_commands.py::test_policy_command PASSED                       [  5%]
+tests/test_commands.py::test_refuses_hard_limit_approval PASSED          [  7%]
+tests/test_commands.py::test_unknown_queue_id PASSED                     [  8%]
+tests/test_commands.py::test_kill_command PASSED                         [ 10%]
+tests/test_hermes_integration.py::test_real_dispatch_block_and_allow PASSED [ 11%]
+tests/test_hermes_integration.py::test_real_tool_registry_handler_json PASSED [ 13%]
+tests/test_hooks.py::test_nonspend_allowed_and_logged PASSED             [ 14%]
+tests/test_hooks.py::test_block_message_stops_retry_and_formats_amount PASSED [ 15%]
+tests/test_hooks.py::test_escalation_key_scoped_to_exact_call PASSED     [ 17%]
+tests/test_hooks.py::test_approval_response_matches_hash_and_records_decider PASSED [ 18%]
+tests/test_hooks.py::test_approval_response_expiry_choices PASSED        [ 20%]
+tests/test_hooks.py::test_denial_choices PASSED                          [ 21%]
+tests/test_hooks.py::test_approved_counts_only_on_post_execution PASSED  [ 23%]
+tests/test_hooks.py::test_post_requires_same_hash PASSED                 [ 24%]
+tests/test_hooks.py::test_policy_error_spend_fails_closed PASSED         [ 26%]
+tests/test_hooks.py::test_bad_policy_json_ignored PASSED                 [ 27%]
+tests/test_hooks.py::test_policy_json_validates_types PASSED             [ 28%]
+tests/test_hooks.py::test_json_string_tool_handler PASSED                [ 30%]
+tests/test_hooks.py::test_allowed_spend_counts_only_after_post_call PASSED [ 31%]
+tests/test_policy.py::test_harmless_names_not_spend[display_image] PASSED [ 33%]
+tests/test_policy.py::test_harmless_names_not_spend[reorder_list] PASSED [ 34%]
+tests/test_policy.py::test_harmless_names_not_spend[border_style] PASSED [ 36%]
+tests/test_policy.py::test_harmless_names_not_spend[read_file] PASSED    [ 37%]
+tests/test_policy.py::test_harmless_names_not_spend[web_search] PASSED   [ 39%]
+tests/test_policy.py::test_harmless_names_not_spend[todo] PASSED         [ 40%]
+tests/test_policy.py::test_spend_tokens[pay_invoice] PASSED              [ 42%]
+tests/test_policy.py::test_spend_tokens[stripe_create_payment] PASSED    [ 43%]
+tests/test_policy.py::test_spend_tokens[mcp__shop__checkout] PASSED      [ 44%]
+tests/test_policy.py::test_spend_tokens[buyTicket] PASSED                [ 46%]
+tests/test_policy.py::test_spend_tokens[place_order] PASSED              [ 47%]
+tests/test_policy.py::test_globs_are_additional PASSED                   [ 49%]
+tests/test_policy.py::test_amount_keys_make_other_tool_spend[amount] PASSED [ 50%]
+tests/test_policy.py::test_amount_keys_make_other_tool_spend[amount_usd] PASSED [ 52%]
+tests/test_policy.py::test_amount_keys_make_other_tool_spend[amount_cents] PASSED [ 53%]
+tests/test_policy.py::test_currency_sibling_allows_price PASSED          [ 55%]
+tests/test_policy.py::test_value_without_currency_not_spending PASSED    [ 56%]
+tests/test_policy.py::test_total_without_currency_not_spending PASSED    [ 57%]
+tests/test_policy.py::test_spend_name_without_amount_escalates PASSED    [ 59%]
+tests/test_policy.py::test_spend_name_without_amount_strict_blocks PASSED [ 60%]
+tests/test_policy.py::test_money_amount_forms PASSED                     [ 62%]
+tests/test_policy.py::test_per_call_hard_limit PASSED                    [ 63%]
+tests/test_policy.py::test_daily_hard_limit PASSED                       [ 65%]
+tests/test_policy.py::test_kill_switch_hard_limit PASSED                 [ 66%]
+tests/test_policy.py::test_payee_hard_limit PASSED                       [ 68%]
+tests/test_policy.py::test_currency_hard_limit PASSED                    [ 69%]
+tests/test_policy.py::test_threshold_escalates PASSED                    [ 71%]
+tests/test_policy.py::test_threshold_strict_blocks PASSED                [ 72%]
+tests/test_policy.py::test_risky_tokens[delete_file] PASSED              [ 73%]
+tests/test_policy.py::test_risky_tokens[remove_user] PASSED              [ 75%]
+tests/test_policy.py::test_risky_tokens[drop_table] PASSED               [ 76%]
+tests/test_policy.py::test_risky_tokens[wipe_disk] PASSED                [ 78%]
+tests/test_policy.py::test_risky_tokens[send_email] PASSED               [ 79%]
+tests/test_policy.py::test_command_risk PASSED                           [ 81%]
+tests/test_policy.py::test_risky_strict_is_still_queueable_block PASSED  [ 82%]
+tests/test_store.py::test_args_hash_order_independent PASSED             [ 84%]
+tests/test_store.py::test_queue_persists PASSED                          [ 85%]
+tests/test_store.py::test_queue_deduplicates_pending PASSED              [ 86%]
+tests/test_store.py::test_queue_trimmed PASSED                           [ 88%]
+tests/test_store.py::test_kill_switch PASSED                             [ 89%]
+tests/test_store.py::test_only_executed_counts PASSED                    [ 91%]
+tests/test_store.py::test_status_transition_once PASSED                  [ 92%]
+tests/test_store.py::test_grant_bound_to_exact_args PASSED               [ 94%]
+tests/test_store.py::test_grant_single_use PASSED                        [ 95%]
+tests/test_store.py::test_atomic_store_creates_json PASSED               [ 97%]
+tests/test_store.py::test_grant_rechecks_hard_daily_limit PASSED         [ 98%]
+tests/test_store.py::test_grant_rechecks_kill_switch PASSED              [100%]
+
+=============================== warnings summary ===============================
+tests/test_hermes_integration.py::test_real_dispatch_block_and_allow
+tests/test_hermes_integration.py::test_real_dispatch_block_and_allow
+tests/test_hermes_integration.py::test_real_tool_registry_handler_json
+  /workspace/hermes-agent-src/hermes_cli/plugins_manifest.py:475: DeprecationWarning: 'maxsplit' is passed as positional argument
+    parts = re.split(r"[-+]", str(v).strip().lstrip("v"), 1)[0].split(".")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 69 passed, 3 warnings in 2.33s ========================

@@ -1,0 +1,22 @@
+manifest_version: 2
+name: agentpay-guard
+version: "0.2.0"
+description: "Policy guard for spending and risky Hermes tool calls, with human-controlled exact-call grants."
+author: chamdom
+license: MIT
+homepage: https://github.com/chamdom/hermes-guard-plugin
+requires_hermes: ">=0.23.0"
+provides_tools: [guard_check]
+provides_hooks: [pre_tool_call, post_tool_call, post_approval_response]
+config_schema:
+  per_call_max: {type: float, default: 50, label: Per-call maximum, description: Hard maximum amount per tool call.}
+  daily_max: {type: float, default: 200, label: Daily maximum, description: Maximum tracked UTC daily spend.}
+  approval_threshold: {type: float, default: 20, label: Approval threshold, description: Amounts above this require approval.}
+  currency: {type: list, default: [USD], label: Currencies, description: Allowed currency codes.}
+  payee_allowlist: {type: list, default: [], label: Payee allowlist, description: Allowed payee names; empty allows any payee.}
+  spend_tool_patterns: {type: list, default: [], label: Spend tool patterns, description: Additional glob patterns treated as spending tools.}
+  risky_tool_patterns: {type: list, default: [], label: Risky tool patterns, description: Additional glob patterns treated as risky tools.}
+  require_approval_tools: {type: list, default: [], label: Require approval tools, description: Glob patterns that always request approval.}
+  mode: {type: str, choices: [escalate, strict], default: escalate, label: Mode, description: Escalate to Hermes or block and queue.}
+  grant_ttl_minutes: {type: int, default: 30, label: Grant lifetime, description: Minutes an exact-call grant remains valid.}
+tags: [security, payments, guardrails]
