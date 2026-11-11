@@ -15,12 +15,12 @@ def _time(value: str) -> str:
 
 
 def _table(rows: list[dict]) -> str:
-    columns = [("id", 8), ("ref", 8), ("time", 5), ("tool", 16), ("amount", 12), ("payee", 14), ("rule", 19), ("status", 10)]
+    columns = [("id", 8), ("time", 5), ("tool", 12), ("amount", 12), ("payee", 14), ("rule", 26), ("status", 10)]
     header = "  ".join(name.ljust(width) for name, width in columns)
     lines = [header, "  ".join("-" * width for _, width in columns)]
     for row in rows:
         amount = "--" if row.get("amount") is None else f"${float(row['amount']):.2f} {row.get('currency', 'USD')}"
-        values = [str(row.get("id", "")), str(row.get("ref") or "--"), _time(row.get("ts", "")),
+        values = [str(row.get("id", "")), _time(row.get("ts", "")),
                   str(row.get("tool", "")), amount, str(row.get("payee") or "--"), str(row.get("rule", "")),
                   str(row.get("status", row.get("decision", "")))]
         lines.append("  ".join(value[:width].ljust(width) for value, (_, width) in zip(values, columns)))

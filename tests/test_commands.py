@@ -9,7 +9,7 @@ def test_status_human_friendly(tmp_path, policy):
 def test_queue_table(tmp_path):
     store = Store(tmp_path); item = store.enqueue("pay_invoice", {"amount": 2}, classify("pay_invoice", {"amount": 2}), "approval_threshold")
     output = dispatch("queue", store, lambda: {})
-    assert item["id"] in output and "pay_invoice" in output and "rule" in output and "ref" in output
+    assert item["id"] in output and "pay_invoice" in output and "rule" in output
 
 def test_queue_all_includes_rejected_but_status_pending_does_not(tmp_path, policy):
     store = Store(tmp_path)
@@ -18,11 +18,13 @@ def test_queue_all_includes_rejected_but_status_pending_does_not(tmp_path, polic
     assert dispatch("queue", store, lambda: policy) == "Queue is empty."
     assert item["id"] in dispatch("queue --all", store, lambda: policy)
 
-def test_ledger_ref_column_and_width(tmp_path):
+def test_ledger_table_omits_ref_column_and_json_keeps_ref(tmp_path):
     store = Store(tmp_path)
     store.append({"id": "abc", "ref": "queue42", "tool": "pay_invoice", "amount": 1, "currency": "USD", "decision": "executed", "ts": "2025-01-01T12:00:00+00:00"})
     output = dispatch("ledger", store, lambda: {})
-    assert "ref" in output and "queue42" in output
+    assert "ref" not in output and "queue42" not in output
+    json_output = dispatch("ledger --json", store, lambda: {})
+    assert '"ref": "queue42"' in json_output
     assert max(map(len, output.splitlines())) <= 110
 
 def test_ledger_table_and_json(tmp_path):
