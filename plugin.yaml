@@ -1,10 +1,10 @@
 manifest_version: 2
 name: agentpay-guard
-version: "0.2.0"
+version: "0.3.0"
 description: "Policy guard for spending and risky Hermes tool calls, with human-controlled exact-call grants."
-author: chamdom
+author: tmdry4530
 license: MIT
-homepage: https://github.com/chamdom/hermes-guard-plugin
+homepage: https://github.com/tmdry4530/hermes-guard-plugin
 requires_hermes: ">=0.23.0"
 provides_tools: [guard_check]
 provides_hooks: [pre_tool_call, post_tool_call, post_approval_response]

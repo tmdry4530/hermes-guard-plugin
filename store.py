@@ -32,6 +32,7 @@ class Store:
         self.ledger_path = self.root / "ledger.json"
         self.queue_path = self.root / "queue.json"
         self.kill_path = self.root / "kill.json"
+        self.in_flight_path = self.root / "in_flight.json"
         self.lock = threading.RLock()
 
     def _read(self, path: Path, default: Any) -> Any:
@@ -75,6 +76,29 @@ class Store:
 
     def pending(self) -> list[dict]:
         return [item for item in self.queue() if item.get("status") == "pending"]
+
+    def record_in_flight(self, tool_call_id: str, digest: str, session: str, ledger_id: str, ref: str = "") -> None:
+        """Persist an authorization so a fresh plugin instance can account for completion."""
+        key = f"{tool_call_id}:{digest}" if tool_call_id else digest
+        with self.lock:
+            rows = self._read(self.in_flight_path, {})
+            current = now()
+            rows = {k: v for k, v in rows.items() if _fresh(v, current)}
+            rows[key] = {"args_hash": digest, "session_id": session, "id": ledger_id,
+                         "ref": ref, "created_at": current.isoformat()}
+            self._write(self.in_flight_path, rows)
+
+    def consume_in_flight(self, tool_call_id: str, digest: str) -> dict | None:
+        key = f"{tool_call_id}:{digest}" if tool_call_id else digest
+        with self.lock:
+            rows = self._read(self.in_flight_path, {})
+            current = now()
+            record = rows.pop(key, None)
+            rows = {k: v for k, v in rows.items() if _fresh(v, current)}
+            self._write(self.in_flight_path, rows)
+            if not record or not _fresh(record, current) or record.get("args_hash") != digest:
+                return None
+            return record
 
     def enqueue(self, tool: str, args: Any, intent: Any, rule: str, session: str = "") -> dict:
         digest = args_hash(tool, args)
@@ -154,3 +178,10 @@ class Store:
         return sum(float(row.get("amount") or 0) for row in self.ledger()
                    if row.get("decision") == "executed" and str(row.get("ts", ""))[:10] == today
                    and str(row.get("currency", "USD")).upper() == currency.upper())
+
+
+def _fresh(record: dict, current: datetime) -> bool:
+    try:
+        return current - datetime.fromisoformat(record["created_at"]) <= timedelta(hours=1)
+    except (KeyError, TypeError, ValueError):
+        return False

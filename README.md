@@ -27,7 +27,7 @@ name tokens + argument inspection
 ## Install
 
 ```sh
-hermes plugins install chamdom/hermes-guard-plugin
+hermes plugins install tmdry4530/hermes-guard-plugin
 hermes plugins enable agentpay-guard
 ```
 
@@ -71,9 +71,28 @@ An optional `policy.json` in `<HERMES_HOME>/plugin-data/agentpay-guard/` overrid
 
 The same actions are available through `hermes agentpay-guard ...`. `/guard approve` refuses hard-limit violations; raise the relevant config limit first. Grants bind to a tool and argument hash, expire after `grant_ttl_minutes`, and are single-use. Hermes `[a]lways` approval keys include tool, payee, and an argument hash prefix, so they apply only to that exact call.
 
+### Quick demo
+
+With `mode: strict`, `approval_threshold: 25`, `per_call_max: 50`, `daily_max: 150`, and `payee_allowlist: [acme-cloud]`:
+
+```text
+pay_invoice(amount=12, to=acme-cloud) -> allowed; tool result: paid
+pay_invoice(amount=40, to=acme-cloud) -> blocked: `AgentPay Guard blocked pay_invoice ($40.00 USD to acme-cloud): approval required strict. Queue id <id>. Do not retry; ask the user to run `/guard approve <id>` (or `hermes agentpay-guard approve <id>`).`
+/guard approve <id> -> Approved exact call <id> once; hard limits will be rechecked when used.
+same pay_invoice(amount=40, to=acme-cloud) -> allowed by one-time grant; tool result: paid
+pay_invoice(amount=500, to=acme-cloud) -> blocked: `AgentPay Guard blocked pay_invoice ($500.00 USD to acme-cloud): per call max. Queue id <id>. Do not retry; ask the user to run `/guard approve <id>` (or `hermes agentpay-guard approve <id>`).`
+pay_invoice(amount=5, to=shady-vendor) -> blocked: `AgentPay Guard blocked pay_invoice ($5.00 USD to shady-vendor): payee not allowed. Queue id <id>. Do not retry; ask the user to run `/guard approve <id>` (or `hermes agentpay-guard approve <id>`).`
+/guard status -> AgentPay Guard (strict)
+                  Spent today: $52.00 / $150.00
+                  Per call: $50.00 | Approval threshold: $25.00
+                  Pending approvals: 2 | Kill switch: off
+```
+
+`<id>` is the queue id printed in the block message. A successful tool result is recorded as spend only by the post-call hook, after the tool reports success.
+
 ## Interaction with Hermes approvals
 
-In `escalate` mode, threshold calls, unknown spend amounts, and configured approval tools use Hermes's approval gate. In `strict` mode, approval-required and risky calls block and enter the queue for an operator grant. Non-interactive Hermes approval requests fail closed. If the user runs Hermes with `--yolo`, Hermes may auto-approve escalations; use strict mode for hard guarantees. Hard limits always block regardless of approval mode.
+In `escalate` mode, threshold calls, unknown spend amounts, and configured approval tools use Hermes's approval gate. In `strict` mode, approval-required and risky calls block and enter the queue for an operator grant. Non-interactive Hermes approval requests fail closed. If Hermes `approvals.mode` is `smart`, Hermes's auxiliary model may answer escalations with `smart_approve`; for spending that must always reach a person, use `mode: strict`, where only a human typing `/guard approve <id>` can grant a call. If the user runs Hermes with `--yolo`, Hermes may auto-approve escalations; use strict mode for hard guarantees. Hard limits always block regardless of approval mode.
 
 ## Disclosure
 
@@ -81,7 +100,7 @@ The plugin uses no network, subprocess, credentials, or background process. It w
 
 ## Limitations
 
-Classification is deterministic but heuristic. A value-moving tool with an unrelated name and no recognized amount fields may not be identified as spending. Daily totals use UTC dates and count calls only after successful-looking execution hooks. Reconcile external payment outcomes independently. Hermes owns its approval prompt and `--yolo` behavior.
+Classification is deterministic but heuristic. A value-moving tool with an unrelated name and no recognized amount fields may not be identified as spending. Daily totals use UTC dates and count calls only after successful-looking execution hooks. Reconcile external payment outcomes independently. Hermes owns its approval prompt and `--yolo` behavior. In `escalate` mode with Hermes `approvals.mode: smart`, its auxiliary model can answer escalation requests; use guard `mode: strict` when every grant must come from a person typing `/guard approve <id>`.
 
 ## License
 

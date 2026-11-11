@@ -15,13 +15,14 @@ def _time(value: str) -> str:
 
 
 def _table(rows: list[dict]) -> str:
-    columns = [("id", 8), ("time", 5), ("tool", 23), ("amount", 15), ("payee", 16), ("rule", 25), ("status", 10)]
+    columns = [("id", 8), ("ref", 8), ("time", 5), ("tool", 16), ("amount", 12), ("payee", 14), ("rule", 19), ("status", 10)]
     header = "  ".join(name.ljust(width) for name, width in columns)
     lines = [header, "  ".join("-" * width for _, width in columns)]
     for row in rows:
         amount = "--" if row.get("amount") is None else f"${float(row['amount']):.2f} {row.get('currency', 'USD')}"
-        values = [str(row.get("id", "")), _time(row.get("ts", "")), str(row.get("tool", "")), amount,
-                  str(row.get("payee") or "--"), str(row.get("rule", "")), str(row.get("status", row.get("decision", "")))]
+        values = [str(row.get("id", "")), str(row.get("ref") or "--"), _time(row.get("ts", "")),
+                  str(row.get("tool", "")), amount, str(row.get("payee") or "--"), str(row.get("rule", "")),
+                  str(row.get("status", row.get("decision", "")))]
         lines.append("  ".join(value[:width].ljust(width) for value, (_, width) in zip(values, columns)))
     return "\n".join(lines)
 
@@ -40,7 +41,7 @@ def dispatch(raw: str, store, policy) -> str:
     if command == "policy":
         return json.dumps(policy(), indent=2, sort_keys=True)
     if command == "queue":
-        rows = store.pending()
+        rows = store.queue() if "--all" in parts else store.pending()
         return _table(rows) if rows else "Queue is empty."
     if command in {"approve", "deny"}:
         if len(parts) < 2:
@@ -52,14 +53,14 @@ def dispatch(raw: str, store, policy) -> str:
             updated = store.set_status(parts[1], "denied", "operator")
             if updated:
                 store.append({**{key: updated.get(key) for key in ("id", "tool", "payee", "amount", "currency", "session_id", "args_hash")},
-                              "ts": updated.get("decided_at"), "decision": "denied", "rule": "operator_decision", "decided_by": "operator"})
+                              "ref": updated.get("id"), "ts": updated.get("decided_at"), "decision": "denied", "rule": "operator_decision", "decided_by": "operator"})
             return f"Denied {parts[1]}."
         if item.get("rule") in {"kill_switch", "payee_not_allowed", "currency_not_allowed", "per_call_max", "daily_max"}:
             return f"Cannot approve {item['rule']}; raise the limit in config first."
         updated = store.set_status(parts[1], "approved", "operator")
         if updated:
             store.append({**{key: updated.get(key) for key in ("id", "tool", "payee", "amount", "currency", "session_id", "args_hash")},
-                          "ts": updated.get("decided_at"), "decision": "approved", "rule": "operator_decision", "decided_by": "operator"})
+                          "ref": updated.get("id"), "ts": updated.get("decided_at"), "decision": "approved", "rule": "operator_decision", "decided_by": "operator"})
         item["status"] = "approved"
         store.add_grant(item, int(policy().get("grant_ttl_minutes", 30)))
         return f"Approved exact call {parts[1]} once; hard limits will be rechecked when used."

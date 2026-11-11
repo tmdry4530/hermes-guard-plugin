@@ -65,6 +65,15 @@ def test_atomic_store_creates_json(tmp_path):
     store.append({"decision": "blocked"})
     assert (tmp_path / "ledger.json").exists()
 
+def test_in_flight_is_persisted_single_use_and_hash_bound(tmp_path):
+    store = Store(tmp_path)
+    digest = args_hash("pay", {"amount": 3})
+    store.record_in_flight("call-a", digest, "s", "queue1", "queue1")
+    fresh = Store(tmp_path)
+    assert fresh.consume_in_flight("call-a", digest)["id"] == "queue1"
+    assert fresh.consume_in_flight("call-a", digest) is None
+    assert fresh.consume_in_flight("call-b", digest) is None
+
 def test_grant_rechecks_hard_daily_limit(tmp_path, policy):
     store = Store(tmp_path)
     args = {"amount": 10}
